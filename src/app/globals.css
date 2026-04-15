@@ -8,9 +8,6 @@
   --size-fit: max(0rem, (100vw - 30rem) / 2); /* 480 px max */
 }
 
-
-
-
 @layer base {
   *,
   *::before,
@@ -28,7 +25,6 @@ label,
 textarea {
   font-family: inherit;
 }
-
 
 body {
   background: var(--background);

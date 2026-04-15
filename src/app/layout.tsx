@@ -3,7 +3,6 @@ import "./globals.css";
 
 import localFont from "next/font/local";
 
-
 // fonts
 const IranYekan = localFont({
   src: [
@@ -30,10 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${IranYekan.className}} antialiased border`}
-    >
+    <html lang="en" className={`${IranYekan.className}} antialiased border`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
