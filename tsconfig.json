@@ -19,7 +19,27 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@sections/*": ["./src/sections/*"],
+      "@icons/*": ["./src/assets/icons/*"],
+      "@images/*": ["./src/assets/images/*"],
+      "@animations/*": ["./src/assets/animations/*"],
+      "@fonts/*": ["./src/assets/fonts/*"],
+      "@components/*": ["./src/components/*"],
+      "@layouts/*": ["./src/utils/layouts/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@helper/*": ["./src/utils/helper/*"],
+      "@functions/*": ["./src/utils/functions/*"],
+      "@configs/*": ["./src/utils/configs/*"],
+      "@api/*": ["./src/utils/api/*"],
+      "@axios/*": ["./src/utils/axios/*"],
+      "@validation/*": ["./src/utils/validation/*"],
+      "@schema/*": ["./src/utils/schema/*"],
+      "@context/*": ["./src/utils/context/*"],
+      "@messages/*": ["./src/utils/messages/*"],
+      "@provider/*": ["./src/utils/provider/*"],
+      "@hooks/*": ["./src/utils/hooks/*"]
     }
   },
   "include": [

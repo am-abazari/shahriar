@@ -1,11 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: hsl(212, 76%, 90%);
+  --foreground: hsl(217, 57%, 14%);
 
   /*  Spacing*/
-  --size-fit: max(0rem, (100vw - 30rem) / 2); /* 480 px max */
+  --size-fit: max(2rem, (100vw - 75rem) / 2); /* 480 px max */
+
+  /*  Border*/
+  --border-poem: hsla(218, 57%, 15%, 0.08);
 }
 
 @layer base {
