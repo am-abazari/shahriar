@@ -56,6 +56,22 @@ const Poem = ({ poem, voice }) => {
     }
   };
 
+  useEffect(() => {
+    const spaceHandler = (key) => {
+      if (key.code === "Space") {
+        if (playing) {
+          pause();
+          setPlaying(false);
+        } else if (sound) {
+          play();
+          setPlaying(true);
+        }
+      }
+    };
+    window.addEventListener("keydown", spaceHandler);
+    return () => window.removeEventListener("keydown", spaceHandler);
+  });
+
   return (
     <div className={"w-full h-full flex flex-col justify-center "}>
       <div className={"bg-white p-5 rounded-xl shadow-md"}>
