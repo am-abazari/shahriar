@@ -1,8 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import useSound from "use-sound";
-
 // styles
 import styles from "./Poem.module.css";
 
@@ -10,67 +7,14 @@ import styles from "./Poem.module.css";
 import MaterialSymbolsPlayArrowRounded from "@icons/MaterialSymbolsPlayArrowRounded";
 import MaterialSymbolsLightPause from "@icons/MaterialSymbolsLightPause";
 
+// hooks
+import useAudio from "@hooks/useAudio";
+
+// helper
+import { clickPercent } from "@helper/click";
+
 const Poem = ({ poem, voice }) => {
-  const [play, { pause, duration, sound }] = useSound(voice, {
-    volume: 0.5,
-  });
-
-  const [playing, setPlaying] = useState(false);
-  const [seek, setSeek] = useState(0);
-  const [actualDuration, setActualDuration] = useState(duration / 1000);
-
-  useEffect(() => {
-    let timer;
-    if (playing && sound) {
-      timer = setInterval(() => {
-        const currentTime = sound.seek();
-        setSeek(currentTime);
-      }, 200);
-    } else if (!playing && sound) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSeek(sound.seek());
-    }
-
-    return () => clearInterval(timer);
-  }, [playing, sound, duration, actualDuration]);
-
-  useEffect(() => {
-    const setDuration = () => {
-      if (duration && !actualDuration) {
-        setActualDuration(duration / 1000);
-      }
-    };
-    setDuration();
-  }, [actualDuration, duration]);
-
-  const seekHandler = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const elementWidth = rect.width;
-    const clickX = e.clientX - rect.left;
-    const percentage = (clickX / elementWidth) * 100;
-    if (sound) {
-      let seeked = (percentage * actualDuration) / 100;
-      if (seeked < 5) seeked = 0;
-      sound.seek(seeked);
-      setSeek(seeked);
-    }
-  };
-
-  useEffect(() => {
-    const spaceHandler = (key) => {
-      if (key.code === "Space") {
-        if (playing) {
-          pause();
-          setPlaying(false);
-        } else if (sound) {
-          play();
-          setPlaying(true);
-        }
-      }
-    };
-    window.addEventListener("keydown", spaceHandler);
-    return () => window.removeEventListener("keydown", spaceHandler);
-  });
+  const { playing, play, pause, seek, changeSeek, duration } = useAudio(voice);
 
   return (
     <div className={"w-full h-full flex flex-col justify-center "}>
@@ -78,21 +22,13 @@ const Poem = ({ poem, voice }) => {
         <p className={"font-bold text-lg text-center"}>{poem.name}</p>
         <p className={"text-sm mt-4 flex justify-center gap-14"}>
           <span>{poem.description}</span>
-          {/*<p className={"text-gray-500"}>*/}
-          {/*  {new Date(poem.createdAt).toLocaleTimeString("fa-IR")}*/}
-          {/*  {" - "}*/}
-          {/*  {new Date(poem.createdAt).toLocaleDateString("fa-IR")}*/}
-          {/*</p>*/}
         </p>
         <div className={"flex flex-col gap-2 mt-14"}>
           {poem?.couplets?.map((couplet) => {
             if (couplet.show)
               return (
                 <div
-                  onClick={() => {
-                    sound.seek(couplet.start_time);
-                    setSeek(couplet.start_time);
-                  }}
+                  onClick={() => changeSeek(couplet.start_time)}
                   key={couplet.id}
                   className={`flex gap-20 ${styles.couplet} ${couplet.start_time <= seek && seek < couplet.end_time && styles["current-couplet"]}`}
                 >
@@ -107,13 +43,8 @@ const Poem = ({ poem, voice }) => {
             <div
               className={"w-full flex justify-center cursor-pointer "}
               onClick={() => {
-                if (playing) {
-                  pause();
-                  setPlaying(false);
-                } else if (sound) {
-                  play();
-                  setPlaying(true);
-                }
+                if (playing) pause();
+                else play();
               }}
             >
               {playing ? (
@@ -121,12 +52,18 @@ const Poem = ({ poem, voice }) => {
               ) : (
                 <MaterialSymbolsPlayArrowRounded className={styles.lgtext} />
               )}
-              {/*{Number(seek).toFixed(0)}*/}
             </div>
 
-            <div onClick={seekHandler} className={styles.outter}>
+            <div
+              onClick={(event) => {
+                let percent = clickPercent(event);
+                if (percent <= 5) percent = 0;
+                changeSeek((percent * duration) / 100);
+              }}
+              className={styles.outter}
+            >
               <div
-                style={{ width: (seek / (actualDuration || 1)) * 100 + "%" }}
+                style={{ width: (seek / (duration || 1)) * 100 + "%" }}
                 className={styles.inner}
               ></div>
             </div>
