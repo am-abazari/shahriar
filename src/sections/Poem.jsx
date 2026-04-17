@@ -19,7 +19,9 @@ const Poem = ({ poem, voice }) => {
   return (
     <div className={"w-full h-full flex flex-col justify-center "}>
       <div className={"bg-white p-5 rounded-xl shadow-md"}>
-        <p className={"font-bold text-lg text-center"}>{poem.name}</p>
+        <p className={"font-bold text-xl text-center text-(--text-primary)"}>
+          {poem.name}
+        </p>
         <p className={"text-sm mt-4 flex justify-center gap-14"}>
           <span>{poem.description}</span>
         </p>

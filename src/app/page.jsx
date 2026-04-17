@@ -17,12 +17,16 @@ export default async function Home() {
             className={"bg-white p-3 rounded-xl shadow-md"}
           >
             <div className={"flex justify-between items-center gap-2"}>
-              <p className={"font-bold text-lg mb-1 grow"}>{poem.name}</p>
+              <p
+                className={"font-bold text-lg mb-1 text-(--text-primary) grow"}
+              >
+                {poem.name}
+              </p>
               <p className={"shrink-0"}>{poem.poet}</p>
             </div>
             <div className={"mt-3 text-gray-700 flex justify-between gap-2"}>
               <p className={"grow"}>{poem.description}</p>
-              <p className={"shrink-0 text-gray-400"}>
+              <p className={"shrink-0 text-gray-400 text-xs"}>
                 {new Date(poem.createdAt).toLocaleTimeString("fa-IR")}
                 {" - "}
                 {new Date(poem.createdAt).toLocaleDateString("fa-IR")}

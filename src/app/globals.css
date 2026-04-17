@@ -9,6 +9,12 @@
 
   /*  Border*/
   --border-poem: hsla(218, 57%, 15%, 0.08);
+
+  /*  Texts*/
+  --text-primary: hsla(196, 61%, 36%, 1);
+
+  /*  Background*/
+  --bg-primary: hsla(196, 61%, 36%, 1);
 }
 
 @layer base {
