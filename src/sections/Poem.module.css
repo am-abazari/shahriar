@@ -1,0 +1,36 @@
+.container {
+  margin-top: 80px;
+  margin-bottom: 30px;
+}
+.outter {
+  margin-top: 12px;
+  margin-inline: auto;
+  border-radius: 8px;
+  width: 500px;
+  height: 14px;
+  background: hsla(196, 61%, 36%, 0.3);
+  overflow: hidden;
+  .inner {
+    height: 100%;
+    background: hsla(196, 61%, 36%, 1);
+    margin-right: auto;
+    transition: all ease-in-out 0.1s;
+  }
+}
+
+.lgtext {
+  font-size: 30px;
+  text-align: center;
+  color: hsla(196, 61%, 36%, 1);
+  cursor: pointer;
+}
+
+.current-couplet {
+  font-weight: bolder;
+  font-size: 18px;
+  margin-block: 10px;
+}
+
+.couplet {
+  cursor: pointer;
+}

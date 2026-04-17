@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: hsl(212, 76%, 90%);
+  --background: hsl(214, 100%, 98%);
   --foreground: hsl(217, 57%, 14%);
 
   /*  Spacing*/

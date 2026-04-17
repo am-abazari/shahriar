@@ -15,7 +15,7 @@ export default async function Page() {
           <Link
             href={`/poem/${poem.id}`}
             key={poem.id}
-            className={"bg-white p-3 rounded-xl"}
+            className={"bg-white p-3 rounded-xl shadow-md"}
           >
             <p className={"font-bold text-lg mb-1"}>{poem.name}</p>
             <p>{poem.description}</p>

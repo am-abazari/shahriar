@@ -14,10 +14,20 @@ export default async function Home() {
           <Link
             href={`/poem/${poem.id}`}
             key={poem.id}
-            className={"bg-white p-3 rounded-xl"}
+            className={"bg-white p-3 rounded-xl shadow-md"}
           >
-            <p className={"font-bold text-lg mb-1"}>{poem.name}</p>
-            <p>{poem.description}</p>
+            <div className={"flex justify-between items-center gap-2"}>
+              <p className={"font-bold text-lg mb-1 grow"}>{poem.name}</p>
+              <p className={"shrink-0"}>{poem.poet}</p>
+            </div>
+            <div className={"mt-3 text-gray-700 flex justify-between gap-2"}>
+              <p className={"grow"}>{poem.description}</p>
+              <p className={"shrink-0 text-gray-400"}>
+                {new Date(poem.createdAt).toLocaleTimeString("fa-IR")}
+                {" - "}
+                {new Date(poem.createdAt).toLocaleDateString("fa-IR")}
+              </p>
+            </div>
           </Link>
         );
       })}
