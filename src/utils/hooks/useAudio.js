@@ -67,6 +67,19 @@ const useAudio = (url) => {
       setSeek(seekTime);
     }
   };
+  useEffect(() => {
+    if (duration - seek * 1000 < 200) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      changeSeek(0);
+      pauseAudio();
+      playAudio();
+    }
+  }, [changeSeek, duration, pauseAudio, seek]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    pauseAudio();
+  }, [url]);
 
   return {
     playing,
