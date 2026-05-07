@@ -32,10 +32,10 @@ const Poem = ({ poem, voice }) => {
                 <div
                   onClick={() => changeSeek(couplet.start_time)}
                   key={couplet.id}
-                  className={`flex gap-20 ${styles.couplet} ${couplet.start_time <= seek && seek < couplet.end_time && styles["current-couplet"]}`}
+                  className={`grid grid-cols-2 ${styles.couplet} ${couplet.start_time <= seek && seek < couplet.end_time && styles["current-couplet"]}`}
                 >
-                  <div className={"grow text-left"}>{couplet.verse1}</div>
-                  <div className={"grow"}>{couplet.verse2}</div>
+                  <div className={"mx-10 text-left"}>{couplet.verse1}</div>
+                  <div className={"mx-10"}>{couplet.verse2}</div>
                 </div>
               );
           })}
