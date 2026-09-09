@@ -74,6 +74,8 @@ export async function uploadAudio(
       access: "public",
       handleUploadUrl: "/api/upload/token",
       contentType: file.type || "audio/mpeg",
+      // فایل‌های بلندِ دکلمه در چند تکه‌ی موازی بالا می‌روند و در صورت خطا تکرار می‌شوند.
+      multipart: file.size > 8 * 1024 * 1024,
       onUploadProgress: ({ percentage }) => onProgress?.(percentage / 100),
     });
     return { url: result.url, name: file.name, type: file.type, size: file.size };

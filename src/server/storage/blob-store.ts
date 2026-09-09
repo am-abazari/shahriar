@@ -29,6 +29,14 @@ export class BlobStore implements Store {
     return hit.url;
   }
 
+  /**
+   * شبکه‌ی توزیع محتوا فایل JSON را دست‌کم یک دقیقه نگه می‌دارد، ولی کاربر بلافاصله
+   * پس از ویرایش به صفحه برمی‌گردد. یک پارامتر یکتا آن کش را دور می‌زند.
+   */
+  private static bust(url: string): string {
+    return `${url}${url.includes("?") ? "&" : "?"}_=${Date.now()}`;
+  }
+
   private async findUrl(id: string): Promise<string | null> {
     const cached = this.recall(id);
     if (cached) return cached;
@@ -49,7 +57,7 @@ export class BlobStore implements Store {
       const loaded = await Promise.all(
         jsonBlobs.map(async (b) => {
           try {
-            const res = await fetch(b.url, { cache: "no-store" });
+            const res = await fetch(BlobStore.bust(b.url), { cache: "no-store" });
             if (!res.ok) return null;
             return (await res.json()) as Piece;
           } catch {
@@ -71,7 +79,7 @@ export class BlobStore implements Store {
   async get(id: string): Promise<Piece | null> {
     const url = await this.findUrl(id);
     if (!url) return null;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(BlobStore.bust(url), { cache: "no-store" });
     if (!res.ok) return null;
     return (await res.json()) as Piece;
   }
@@ -82,7 +90,8 @@ export class BlobStore implements Store {
       contentType: "application/json; charset=utf-8",
       addRandomSuffix: false,
       allowOverwrite: true,
-      cacheControlMaxAge: 0,
+      // کمترین مقدار مجاز یک دقیقه است؛ برای تازه‌ماندن، هنگام خواندن کش را دور می‌زنیم.
+      cacheControlMaxAge: 60,
     });
     this.remember(piece.id, result.url);
   }
