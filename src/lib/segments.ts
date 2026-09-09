@@ -1,5 +1,4 @@
 import type { Segment } from "./types";
-import { roundTime } from "./time";
 
 /** کوچک‌ترین طول مجاز برای یک قطعه (ثانیه). */
 export const MIN_SEGMENT_LENGTH = 0.15;
@@ -55,50 +54,6 @@ export function validateSegments(segments: Segment[], duration?: number): Segmen
   });
 
   return issues;
-}
-
-/**
- * زمان شروعِ پیشنهادی برای سطر index: پایانِ آخرین سطرِ زمان‌بندی‌شده‌ی پیش از آن.
- * اگر سطر قبلی هنوز زمان نخورده باشد، به عقب‌تر نگاه می‌کند.
- */
-export function suggestStart(segments: Segment[], index: number): number {
-  for (let i = index - 1; i >= 0; i--) {
-    const prev = segments[i];
-    if (prev && Number.isFinite(prev.end) && prev.end > 0) return roundTime(prev.end);
-  }
-  return 0;
-}
-
-/**
- * تنظیم زمان پایانِ یک سطر و انتشار خودکار آن به شروعِ سطر بعدی.
- * این تابع تضمین می‌کند که مرزها هرگز روی هم نیفتند.
- */
-export function setEndAndChain(segments: Segment[], index: number, end: number): Segment[] {
-  const value = roundTime(end);
-  return segments.map((seg, i) => {
-    if (i === index) {
-      const start = Math.min(seg.start, Math.max(0, value - MIN_SEGMENT_LENGTH));
-      return { ...seg, start: roundTime(start), end: value };
-    }
-    // سطر بعدی: اگر هنوز زمان‌بندی نشده یا شروعش عقب‌تر از پایان سطر فعلی است، هم‌تراز شود.
-    if (i === index + 1 && (!seg.end || seg.start < value)) {
-      const nextEnd = seg.end && seg.end > value ? seg.end : 0;
-      return { ...seg, start: value, end: nextEnd };
-    }
-    return seg;
-  });
-}
-
-/** تنظیم زمان شروع یک سطر، بدون اینکه به سطر قبلی نفوذ کند. */
-export function setStartClamped(segments: Segment[], index: number, start: number): Segment[] {
-  const prev = segments[index - 1];
-  const floor = prev && prev.end ? prev.end : 0;
-  const value = roundTime(Math.max(floor, start));
-  return segments.map((seg, i) => {
-    if (i !== index) return seg;
-    const end = seg.end && seg.end > value ? seg.end : 0;
-    return { ...seg, start: value, end };
-  });
 }
 
 /**
