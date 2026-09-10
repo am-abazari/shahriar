@@ -1,38 +1,100 @@
-import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
+import { neon } from "@neondatabase/serverless";
 
 /**
- * درایور HTTP نئون روی توابع بدون‌سرور بهترین انتخاب است: هر پرس‌وجو یک درخواست
- * مستقل است، پس هیچ استخر اتصالی برای نگه‌داشتن یا ته‌کشیدن وجود ندارد.
+ * لایه‌ی دسترسی به پستگرس با دو پشتوانه:
+ *
+ *  • با DATABASE_URL از درایور HTTP نئون استفاده می‌شود. روی توابع بدون‌سرور
+ *    بهترین انتخاب است، چون هر پرس‌وجو یک درخواست مستقل است و استخر اتصالی
+ *    برای نگه‌داشتن یا ته‌کشیدن وجود ندارد.
+ *
+ *  • بدون DATABASE_URL یک پستگرسِ درون‌فرایندی (PGlite) روی دیسک محلی بالا
+ *    می‌آید تا اجرای توسعه‌ای به هیچ سرویس بیرونی نیاز نداشته باشد. این مسیر
+ *    هرگز در پروداکشن اجرا نمی‌شود.
  */
-let client: NeonQueryFunction<false, false> | null = null;
 
-export function connectionString(): string {
-  const url =
+type Rows = Record<string, unknown>[];
+type Driver = (text: string, params: unknown[]) => Promise<Rows>;
+
+export function databaseUrl(): string | null {
+  return (
     process.env.DATABASE_URL ||
     process.env.POSTGRES_URL ||
     process.env.DATABASE_URL_UNPOOLED ||
-    process.env.POSTGRES_URL_NON_POOLING;
+    process.env.POSTGRES_URL_NON_POOLING ||
+    null
+  );
+}
 
-  if (!url) {
-    throw new Error(
-      "نشانی دیتابیس تنظیم نشده است. متغیر DATABASE_URL را در محیط اجرا قرار دهید.",
+/** آیا پایگاه داده‌ی راه‌دور پیکربندی شده است؟ */
+export function hasDatabase(): boolean {
+  return databaseUrl() !== null || allowLocalFallback();
+}
+
+/** پشتوانه‌ی محلی فقط بیرون از پروداکشن مجاز است. */
+function allowLocalFallback(): boolean {
+  return process.env.NODE_ENV !== "production";
+}
+
+/**
+ * درایور و طرح جدول‌ها روی globalThis نگه داشته می‌شوند، نه در دامنه‌ی ماژول.
+ * در Next مسیرهای app و pages گراف ماژول جداگانه دارند و همین فایل دو بار
+ * ارزیابی می‌شود؛ بدون این اشتراک، حالت توسعه دو نمونه‌ی مجزای پستگرسِ محلی
+ * می‌ساخت و نوشته‌های یکی برای دیگری نامرئی می‌ماند. بارگذاری دوباره‌ی داغ هم
+ * به همین شکل مهار می‌شود.
+ */
+interface DbGlobal {
+  driver?: Promise<Driver> | null;
+  schema?: Promise<void> | null;
+}
+
+const dbGlobal = globalThis as typeof globalThis & { __shahriarDb?: DbGlobal };
+dbGlobal.__shahriarDb ??= {};
+const shared = dbGlobal.__shahriarDb;
+
+function createDriver(): Promise<Driver> {
+  const url = databaseUrl();
+
+  if (url) {
+    const client = neon(url);
+    return Promise.resolve(async (text, params) => (await client.query(text, params)) as Rows);
+  }
+
+  if (!allowLocalFallback()) {
+    return Promise.reject(
+      new Error("نشانی دیتابیس تنظیم نشده است. متغیر DATABASE_URL را در محیط اجرا قرار دهید."),
     );
   }
-  return url;
+
+  return (async () => {
+    const [{ PGlite }, { mkdirSync }, path] = await Promise.all([
+      import("@electric-sql/pglite"),
+      import("node:fs"),
+      import("node:path"),
+    ]);
+
+    // PGlite پوشه‌ی تودرتو را خودش نمی‌سازد؛ در یک نسخه‌ی تازه‌ی مخزن وجود ندارد.
+    const dir = path.join(process.cwd(), ".data", "pg");
+    mkdirSync(dir, { recursive: true });
+
+    const local = new PGlite(dir);
+    await local.waitReady;
+    console.warn(`[shahriar] DATABASE_URL تنظیم نشده؛ از پستگرس محلی در ${dir} استفاده می‌شود.`);
+    return async (text, params) => {
+      const result = await local.query(text, params as unknown[]);
+      return result.rows as Rows;
+    };
+  })();
 }
 
-export function hasDatabase(): boolean {
-  try {
-    connectionString();
-    return true;
-  } catch {
-    return false;
+function getDriver(): Promise<Driver> {
+  if (!shared.driver) {
+    shared.driver = createDriver().catch((error) => {
+      // در صورت شکست، فراخوانی بعدی دوباره تلاش می‌کند.
+      shared.driver = null;
+      throw error;
+    });
   }
-}
-
-export function sql(): NeonQueryFunction<false, false> {
-  if (!client) client = neon(connectionString());
-  return client;
+  return shared.driver;
 }
 
 /* ————————————————— ساخت جدول‌ها ————————————————— */
@@ -82,26 +144,24 @@ const STATEMENTS = [
    )`,
 ];
 
-let schemaReady: Promise<void> | null = null;
-
 /**
  * جدول‌ها در نخستین پرس‌وجوی هر نمونه ساخته می‌شوند.
  * نتیجه در سطح ماژول کش می‌شود تا در فراخوانی‌های گرمِ بعدی تکرار نشود.
  */
 export function ensureSchema(): Promise<void> {
-  if (!schemaReady) {
-    schemaReady = (async () => {
-      const db = sql();
+  if (!shared.schema) {
+    shared.schema = (async () => {
+      const run = await getDriver();
       for (const statement of STATEMENTS) {
-        await db.query(statement);
+        await run(statement, []);
       }
     })().catch((error) => {
       // در صورت شکست، دفعه‌ی بعد دوباره تلاش می‌کنیم.
-      schemaReady = null;
+      shared.schema = null;
       throw error;
     });
   }
-  return schemaReady;
+  return shared.schema;
 }
 
 /** اجرای پرس‌وجو پس از اطمینان از وجود جدول‌ها. */
@@ -110,6 +170,7 @@ export async function query<T = Record<string, unknown>>(
   params: unknown[] = [],
 ): Promise<T[]> {
   await ensureSchema();
-  const rows = await sql().query(text, params);
+  const run = await getDriver();
+  const rows = await run(text, params);
   return rows as T[];
 }

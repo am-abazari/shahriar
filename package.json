@@ -20,6 +20,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/express": "^5.0.0",
     "@types/multer": "^1.4.12",
