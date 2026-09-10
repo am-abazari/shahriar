@@ -34,7 +34,9 @@ export interface Piece {
   /** توضیح یا یادداشت کوتاه. */
   note: string;
   form: PieceForm;
-  /** نشانی فایل صوتی (Blob یا مسیر محلی). */
+  /** شناسه‌ی فایل صوتی در دیتابیس. */
+  audioId: string;
+  /** نشانی پخش که از روی audioId ساخته می‌شود. */
   audioUrl: string;
   audioName: string;
   audioType: string;

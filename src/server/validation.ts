@@ -16,16 +16,40 @@ export const pieceInputSchema = z.object({
   poet: z.string().trim().max(120).default(""),
   note: z.string().trim().max(1200).default(""),
   form: formEnum.default("ghazal"),
-  audioUrl: z.string().min(1, "فایل صوتی لازم است."),
+  audioId: z.string().uuid("شناسه‌ی فایل صوتی معتبر نیست."),
   audioName: z.string().max(300).default(""),
   audioType: z.string().max(120).default(""),
   audioSize: z.number().int().min(0).default(0),
-  duration: z.number().finite().min(0).default(0),
+  duration: z.number().finite().min(0).max(60 * 60 * 12).default(0),
   accent: z.enum(ACCENTS).default("amber"),
   segments: z.array(segmentSchema).max(2000).default([]),
 });
 
 export type PieceInput = z.infer<typeof pieceInputSchema>;
+
+export const loginSchema = z.object({
+  username: z.string().trim().min(1, "نام کاربری را بنویسید.").max(120),
+  password: z.string().min(1, "رمز را بنویسید.").max(300),
+});
+
+export const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(1, "رمز فعلی لازم است.").max(300),
+  username: z.string().trim().min(3, "نام کاربری دست‌کم سه نویسه باشد.").max(120),
+  newPassword: z
+    .string()
+    .min(8, "رمز تازه دست‌کم هشت نویسه باشد.")
+    .max(300),
+});
+
+export const uploadInitSchema = z.object({
+  name: z.string().trim().max(300).default("audio"),
+  type: z.string().trim().max(120).default(""),
+  size: z
+    .number()
+    .int()
+    .positive("فایل خالی است.")
+    .max(200 * 1024 * 1024, "حجم فایل بیش از حد مجاز است."),
+});
 
 /**
  * بررسی نهایی مرزهای زمانی روی سرور.
@@ -60,10 +84,6 @@ export const ALLOWED_AUDIO_TYPES = [
   "audio/aac",
   "audio/flac",
   "audio/x-flac",
-  "video/mp4",
-  "video/webm",
 ];
 
-export const MAX_AUDIO_BYTES = 100 * 1024 * 1024;
-/** سقف بدنه‌ی درخواست در توابع بدون‌سرورِ ورسل. */
-export const SERVER_UPLOAD_LIMIT = 4 * 1024 * 1024;
+export const MAX_AUDIO_BYTES = 60 * 1024 * 1024;

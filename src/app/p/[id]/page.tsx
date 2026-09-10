@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PieceView } from "@/components/PieceView";
-import { getStore } from "@/server/storage";
+import { getPiece } from "@/server/db/pieces";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +11,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const piece = await getStore().get(id);
+  const piece = await getPiece(id);
   if (!piece) return { title: "اثر پیدا نشد" };
   return {
     title: piece.title,
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PiecePage({ params }: Props) {
   const { id } = await params;
-  const piece = await getStore().get(id);
+  const piece = await getPiece(id);
   if (!piece) notFound();
   return <PieceView piece={piece} />;
 }

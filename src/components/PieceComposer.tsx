@@ -31,9 +31,9 @@ export function PieceComposer({ piece }: Props) {
   const [form, setForm] = useState<PieceForm>(piece?.form ?? "ghazal");
   const [accent, setAccent] = useState(piece?.accent ?? "amber");
 
-  // نشانی محلی برای پخش فوری، و نشانی نهایی برای ذخیره.
+  // نشانی محلی برای پخش فوری، و شناسه‌ی دیتابیس برای ذخیره.
   const [localUrl, setLocalUrl] = useState<string | null>(piece?.audioUrl ?? null);
-  const [remoteUrl, setRemoteUrl] = useState<string | null>(piece?.audioUrl ?? null);
+  const [audioId, setAudioId] = useState<string | null>(piece?.audioId ?? null);
   const [audioMeta, setAudioMeta] = useState({
     name: piece?.audioName ?? "",
     type: piece?.audioType ?? "",
@@ -76,23 +76,16 @@ export function PieceComposer({ piece }: Props) {
     const url = URL.createObjectURL(file);
     objectUrlRef.current = url;
     setLocalUrl(url);
-    setRemoteUrl(null);
+    setAudioId(null);
     setAudioMeta({ name: file.name, type: file.type, size: file.size });
     if (!title) setTitle(file.name.replace(/\.[^.]+$/, ""));
 
-    const cfg = config ?? (await api.config().catch(() => null));
-    if (!cfg) {
-      setUpload({ status: "error", message: "پیکربندی سرور در دسترس نیست." });
-      return;
-    }
-    setConfig(cfg);
     setUpload({ status: "uploading", progress: 0 });
-
     try {
-      const saved = await uploadAudio(file, cfg, (fraction) =>
+      const saved = await uploadAudio(file, (fraction) =>
         setUpload({ status: "uploading", progress: fraction }),
       );
-      setRemoteUrl(saved.url);
+      setAudioId(saved.id);
       setAudioMeta({ name: saved.name, type: saved.type, size: saved.size });
       setUpload({ status: "done" });
     } catch (uploadError) {
@@ -118,7 +111,7 @@ export function PieceComposer({ piece }: Props) {
       setError("عنوان اثر را بنویسید.");
       return;
     }
-    if (!remoteUrl) {
+    if (!audioId) {
       setError(
         upload.status === "uploading"
           ? "آپلود هنوز تمام نشده است."
@@ -138,7 +131,7 @@ export function PieceComposer({ piece }: Props) {
       note: note.trim(),
       form,
       accent,
-      audioUrl: remoteUrl,
+      audioId,
       audioName: audioMeta.name,
       audioType: audioMeta.type,
       audioSize: audioMeta.size,
@@ -169,9 +162,9 @@ export function PieceComposer({ piece }: Props) {
         صدا را بگذارید، متن را بچسبانید و مرز هر مصرع را همان‌طور که گوش می‌دهید ثبت کنید.
       </p>
 
-      {config && !config.persistent && (
+      {config && !config.database && (
         <p className="mt-5 rounded-2xl border border-amber-400/25 bg-amber-400/[0.07] px-4 py-3 text-xs leading-6 text-amber-200/90">
-          این محیط روی دیسک محلی ذخیره می‌کند. برای ماندگاری روی ورسل، یک فضای Blob به پروژه وصل کنید.
+          دیتابیس به برنامه وصل نیست؛ تا وقتی متغیر DATABASE_URL تنظیم نشود ذخیره‌سازی کار نمی‌کند.
         </p>
       )}
 

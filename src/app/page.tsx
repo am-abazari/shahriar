@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { PieceCard } from "@/components/PieceCard";
-import { getStore } from "@/server/storage";
+import { listPieces } from "@/server/db/pieces";
 import { toPersianDigits } from "@/lib/time";
 
 // فهرست باید همیشه تازه باشد؛ کاربر بلافاصله پس از افزودن اثر به اینجا برمی‌گردد.
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const pieces = await getStore().list();
+  const pieces = await listPieces();
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-12 sm:py-20">
