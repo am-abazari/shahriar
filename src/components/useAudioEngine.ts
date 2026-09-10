@@ -10,12 +10,18 @@ export interface AudioEngine {
   ready: boolean;
   error: string | null;
   rate: number;
+  /** جلوترین ثانیه‌ای که مرورگر پیش‌بارگیری کرده است. */
+  buffered: number;
+  volume: number;
+  muted: boolean;
   play: () => void;
   pause: () => void;
   toggle: () => void;
   seek: (seconds: number) => void;
   nudge: (delta: number) => void;
   setRate: (rate: number) => void;
+  setVolume: (value: number) => void;
+  toggleMute: () => void;
 }
 
 /**
@@ -27,6 +33,8 @@ export interface AudioEngine {
 export function useAudioEngine(src: string | null): AudioEngine {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const frameRef = useRef<number | null>(null);
+  // سرعت را جدا نگه می‌داریم تا پس از بارگیری دوباره‌ی فایل، از دست نرود.
+  const rateRef = useRef(1);
 
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -34,6 +42,9 @@ export function useAudioEngine(src: string | null): AudioEngine {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rate, setRateState] = useState(1);
+  const [buffered, setBuffered] = useState(0);
+  const [volume, setVolumeState] = useState(1);
+  const [muted, setMuted] = useState(false);
 
   // حلقه‌ی نمونه‌برداری فقط در حین پخش زنده است تا در حالت مکث CPU مصرف نشود.
   useEffect(() => {
@@ -62,6 +73,16 @@ export function useAudioEngine(src: string | null): AudioEngine {
       setDuration(Number.isFinite(el.duration) ? el.duration : 0);
       setReady(true);
       setError(null);
+      // با هر بار بارگیری دوباره، مرورگر سرعت را به ۱ برمی‌گرداند.
+      el.playbackRate = rateRef.current;
+    };
+    const onProgress = () => {
+      const ranges = el.buffered;
+      setBuffered(ranges.length ? ranges.end(ranges.length - 1) : 0);
+    };
+    const onVolume = () => {
+      setVolumeState(el.volume);
+      setMuted(el.muted);
     };
     const onPlay = () => setPlaying(true);
     const onPause = () => setPlaying(false);
@@ -78,6 +99,8 @@ export function useAudioEngine(src: string | null): AudioEngine {
     el.addEventListener("pause", onPause);
     el.addEventListener("ended", onEnded);
     el.addEventListener("seeked", onSeeked);
+    el.addEventListener("progress", onProgress);
+    el.addEventListener("volumechange", onVolume);
     el.addEventListener("error", onError);
 
     return () => {
@@ -87,6 +110,8 @@ export function useAudioEngine(src: string | null): AudioEngine {
       el.removeEventListener("pause", onPause);
       el.removeEventListener("ended", onEnded);
       el.removeEventListener("seeked", onSeeked);
+      el.removeEventListener("progress", onProgress);
+      el.removeEventListener("volumechange", onVolume);
       el.removeEventListener("error", onError);
     };
   }, [src]);
@@ -98,6 +123,7 @@ export function useAudioEngine(src: string | null): AudioEngine {
     setReady(false);
     setPlaying(false);
     setError(null);
+    setBuffered(0);
   }, [src]);
 
   const play = useCallback(() => {
@@ -136,8 +162,27 @@ export function useAudioEngine(src: string | null): AudioEngine {
 
   const setRate = useCallback((value: number) => {
     const el = audioRef.current;
+    rateRef.current = value;
     if (el) el.playbackRate = value;
     setRateState(value);
+  }, []);
+
+  const setVolume = useCallback((value: number) => {
+    const el = audioRef.current;
+    const clamped = Math.min(1, Math.max(0, value));
+    if (el) {
+      el.volume = clamped;
+      // کشیدن لغزنده به بالای صفر یعنی کاربر می‌خواهد دوباره بشنود.
+      if (clamped > 0) el.muted = false;
+    }
+    setVolumeState(clamped);
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.muted = !el.muted;
+    setMuted(el.muted);
   }, []);
 
   return {
@@ -148,11 +193,16 @@ export function useAudioEngine(src: string | null): AudioEngine {
     ready,
     error,
     rate,
+    buffered,
+    volume,
+    muted,
     play,
     pause,
     toggle,
     seek,
     nudge,
     setRate,
+    setVolume,
+    toggleMute,
   };
 }
