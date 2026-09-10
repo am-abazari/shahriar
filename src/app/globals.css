@@ -229,6 +229,55 @@ body {
   background: transparent;
 }
 
+/* لغزنده‌ی بلندی صدا؛ ظاهر پیش‌فرض مرورگر با تم نمی‌خواند. */
+.range-slim {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.14);
+  outline: none;
+  cursor: pointer;
+}
+
+.range-slim::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgb(var(--accent));
+  border: none;
+  box-shadow: 0 2px 8px -2px rgb(var(--accent) / 0.8);
+}
+
+.range-slim::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 999px;
+  background: rgb(var(--accent));
+}
+
+.range-slim:focus-visible {
+  box-shadow: 0 0 0 3px rgb(var(--accent) / 0.2);
+}
+
+/* راهنمای میان‌برهای صفحه‌کلید در صفحه‌ی اثر. */
+.kbd {
+  display: inline-block;
+  min-width: 1.35rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: rgb(255 255 255 / 0.05);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: center;
+  color: rgb(var(--accent-soft));
+}
+
 @media (prefers-reduced-motion: reduce) {
   .aurora::before,
   .aurora::after {
