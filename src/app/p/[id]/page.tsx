@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PieceView } from "@/components/PieceView";
 import { getPiece } from "@/server/db/pieces";
+import { isAdmin } from "@/server/session";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PiecePage({ params }: Props) {
   const { id } = await params;
-  const piece = await getPiece(id);
+  const [piece, admin] = await Promise.all([getPiece(id), isAdmin()]);
   if (!piece) notFound();
-  return <PieceView piece={piece} />;
+  return <PieceView piece={piece} admin={admin} />;
 }

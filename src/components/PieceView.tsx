@@ -12,7 +12,7 @@ import { AudioPlayer } from "./AudioPlayer";
 import { LyricsStage } from "./LyricsStage";
 import { useAudioEngine } from "./useAudioEngine";
 
-export function PieceView({ piece }: { piece: Piece }) {
+export function PieceView({ piece, admin }: { piece: Piece; admin: boolean }) {
   const router = useRouter();
   const engine = useAudioEngine(piece.audioUrl);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -60,9 +60,11 @@ export function PieceView({ piece }: { piece: Piece }) {
         )}
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-          <Link href={`/p/${piece.id}/edit`} className="btn btn-ghost !py-1.5 !text-xs">
-            ویرایش زمان‌بندی
-          </Link>
+          {admin && (
+            <Link href={`/p/${piece.id}/edit`} className="btn btn-ghost !py-1.5 !text-xs">
+              ویرایش زمان‌بندی
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setAutoScroll((v) => !v)}
@@ -75,9 +77,16 @@ export function PieceView({ piece }: { piece: Piece }) {
               خروجی LRC
             </button>
           )}
-          <button type="button" onClick={remove} disabled={busy} className="btn btn-danger !py-1.5 !text-xs">
-            حذف
-          </button>
+          {admin && (
+            <button
+              type="button"
+              onClick={remove}
+              disabled={busy}
+              className="btn btn-danger !py-1.5 !text-xs"
+            >
+              حذف
+            </button>
+          )}
         </div>
       </header>
 

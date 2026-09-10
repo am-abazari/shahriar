@@ -2,12 +2,13 @@ import Link from "next/link";
 import { PieceCard } from "@/components/PieceCard";
 import { listPieces } from "@/server/db/pieces";
 import { toPersianDigits } from "@/lib/time";
+import { isAdmin } from "@/server/session";
 
 // فهرست باید همیشه تازه باشد؛ کاربر بلافاصله پس از افزودن اثر به اینجا برمی‌گردد.
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const pieces = await listPieces();
+  const [pieces, admin] = await Promise.all([listPieces(), isAdmin()]);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-12 sm:py-20">
@@ -30,20 +31,25 @@ export default async function HomePage() {
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link href="/new" className="btn btn-primary !px-6 !py-3">
-            افزودن اثر تازه
-          </Link>
           {pieces.length > 0 && (
-            <a href="#gonjine" className="btn btn-ghost !px-6 !py-3">
+            <a href="#gonjine" className="btn btn-primary !px-6 !py-3">
               دیدن گنجینه ({toPersianDigits(pieces.length)})
             </a>
+          )}
+          {admin && (
+            <Link
+              href="/new"
+              className={`btn !px-6 !py-3 ${pieces.length > 0 ? "btn-ghost" : "btn-primary"}`}
+            >
+              افزودن اثر تازه
+            </Link>
           )}
         </div>
       </section>
 
       <section id="gonjine" className="mt-20 scroll-mt-24">
         {pieces.length === 0 ? (
-          <EmptyState />
+          <EmptyState admin={admin} />
         ) : (
           <>
             <div className="mb-6 flex items-baseline justify-between">
@@ -64,7 +70,7 @@ export default async function HomePage() {
   );
 }
 
-function EmptyState() {
+function EmptyState({ admin }: { admin: boolean }) {
   return (
     <div className="glass mx-auto max-w-lg rounded-3xl p-10 text-center">
       <div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-gold/10 text-2xl">
@@ -72,11 +78,15 @@ function EmptyState() {
       </div>
       <h2 className="text-lg font-bold">گنجینه هنوز خالی است</h2>
       <p className="mt-3 text-sm leading-7 text-paper-dim">
-        نخستین غزل یا دکلمه را بیفزایید تا اینجا بنشیند.
+        {admin
+          ? "نخستین غزل یا دکلمه را بیفزایید تا اینجا بنشیند."
+          : "هنوز اثری منتشر نشده است. به‌زودی سر بزنید."}
       </p>
-      <Link href="/new" className="btn btn-primary mt-6">
-        شروع کنیم
-      </Link>
+      {admin && (
+        <Link href="/new" className="btn btn-primary mt-6">
+          شروع کنیم
+        </Link>
+      )}
     </div>
   );
 }
