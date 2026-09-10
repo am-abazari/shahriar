@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Piece } from "@/lib/types";
@@ -16,8 +16,10 @@ export function PieceView({ piece, admin }: { piece: Piece; admin: boolean }) {
   const router = useRouter();
   const engine = useAudioEngine(piece.audioUrl);
   const [autoScroll, setAutoScroll] = useState(true);
-  const [repeat, setRepeat] = useState(false);
+  /** شماره‌ی بیتی که تکرار می‌شود؛ ‎-۱ یعنی تکرار خاموش است. */
+  const [repeatIndex, setRepeatIndex] = useState(-1);
   const [busy, setBusy] = useState(false);
+  const repeat = repeatIndex >= 0;
 
   const form = PIECE_FORMS.find((f) => f.value === piece.form)?.label ?? "شعر";
   const ordered = useMemo(() => sortSegments(piece.segments), [piece.segments]);
@@ -29,7 +31,10 @@ export function PieceView({ piece, admin }: { piece: Piece; admin: boolean }) {
   const goToVerse = useCallback(
     (index: number) => {
       const target = ordered[index];
-      if (target) seek(target.start + 0.01);
+      if (!target) return;
+      seek(target.start + 0.01);
+      // اگر تکرار روشن است، قفل روی همان بیتی می‌رود که کاربر انتخاب کرد.
+      setRepeatIndex((current) => (current >= 0 ? index : current));
     },
     [ordered, seek],
   );
@@ -59,18 +64,28 @@ export function PieceView({ piece, admin }: { piece: Piece; admin: boolean }) {
     goToVerse(upcoming >= 0 ? upcoming : ordered.length - 1);
   }, [engine.currentTime, goToVerse, ordered]);
 
-  // تکرار بیت: وقتی زمان از پایان سطر فعال رد شد، به ابتدای همان سطر برمی‌گردیم.
-  const repeatIndex = useRef(-1);
+  // تکرار بیت: وقتی زمان از پایان بیتِ قفل‌شده رد شد، به ابتدای همان بیت برمی‌گردیم.
+  // قفل عمداً با جلو رفتن زمان جابه‌جا نمی‌شود، وگرنه تکرار هرگز رخ نمی‌داد.
   useEffect(() => {
-    if (!repeat) {
-      repeatIndex.current = -1;
-      return;
-    }
-    if (activeIndex >= 0) repeatIndex.current = activeIndex;
-
-    const locked = ordered[repeatIndex.current];
+    if (repeatIndex < 0) return;
+    const locked = ordered[repeatIndex];
     if (locked && engine.currentTime >= locked.end) seek(locked.start + 0.01);
-  }, [activeIndex, engine.currentTime, ordered, repeat, seek]);
+  }, [engine.currentTime, ordered, repeatIndex, seek]);
+
+  /**
+   * روشن و خاموش کردن تکرار.
+   * هنگام روشن‌شدن، روی بیتِ در حال خواندن قفل می‌شود؛ اگر در فاصله‌ی میان دو
+   * بیت باشیم، روی نزدیک‌ترین بیتِ پیشِ‌رو.
+   */
+  const toggleRepeat = useCallback(() => {
+    setRepeatIndex((current) => {
+      if (current >= 0) return -1;
+      const active = findActiveIndex(ordered, engine.currentTime);
+      if (active >= 0) return active;
+      const upcoming = ordered.findIndex((s) => s.start > engine.currentTime);
+      return upcoming >= 0 ? upcoming : ordered.length - 1;
+    });
+  }, [engine.currentTime, ordered]);
 
   // میان‌برهای صفحه‌کلید؛ وقتی تمرکز روی یک ورودی است، دخالت نمی‌کنیم.
   useEffect(() => {
@@ -107,7 +122,7 @@ export function PieceView({ piece, admin }: { piece: Piece; admin: boolean }) {
           break;
         case "r":
         case "R":
-          setRepeat((v) => !v);
+          toggleRepeat();
           break;
         default:
           break;
@@ -116,7 +131,7 @@ export function PieceView({ piece, admin }: { piece: Piece; admin: boolean }) {
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [engine, nextVerse, prevVerse]);
+  }, [engine, nextVerse, prevVerse, toggleRepeat]);
 
   // اطلاعات اثر روی صفحه‌ی قفل گوشی و کنترل‌های سیستمی.
   useEffect(() => {
@@ -237,7 +252,7 @@ export function PieceView({ piece, admin }: { piece: Piece; admin: boolean }) {
             onPrevVerse={hasSegments ? prevVerse : undefined}
             onNextVerse={hasSegments ? nextVerse : undefined}
             repeat={hasSegments ? repeat : undefined}
-            onToggleRepeat={hasSegments ? () => setRepeat((v) => !v) : undefined}
+            onToggleRepeat={hasSegments ? toggleRepeat : undefined}
           />
 
           <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-paper-faint">
