@@ -8,7 +8,7 @@ import { getExpressApp } from "@/server/app";
  */
 export const config = {
   api: {
-    // خواندن بدنه بر عهده‌ی express.json و multer است.
+    // خواندن بدنه بر عهده‌ی express.json و express.raw است.
     bodyParser: false,
     externalResolver: true,
     responseLimit: false,
