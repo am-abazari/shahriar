@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Piece } from "@/lib/types";
@@ -20,6 +20,21 @@ export function PieceView({ piece, admin }: { piece: Piece; admin: boolean }) {
   const [repeatIndex, setRepeatIndex] = useState(-1);
   const [busy, setBusy] = useState(false);
   const repeat = repeatIndex >= 0;
+
+  // ارتفاع نوار پخش اندازه گرفته می‌شود، نه حدس زده: روی صفحه‌ی باریک
+  // کنترل‌ها در چند ردیف می‌شکنند و نوار بلندتر می‌شود.
+  const barRef = useRef<HTMLDivElement | null>(null);
+  const [barHeight, setBarHeight] = useState(92);
+
+  useEffect(() => {
+    const node = barRef.current;
+    if (!node) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setBarHeight(entry.contentRect.height);
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   const form = PIECE_FORMS.find((f) => f.value === piece.form)?.label ?? "شعر";
   const ordered = useMemo(() => sortSegments(piece.segments), [piece.segments]);
@@ -187,64 +202,95 @@ export function PieceView({ piece, admin }: { piece: Piece; admin: boolean }) {
   return (
     <div
       data-accent={piece.accent}
-      className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-4xl flex-col px-5 pb-44 pt-8"
+      className="flex min-h-[calc(100dvh-4rem)] w-full flex-col"
     >
       <audio ref={engine.audioRef} src={piece.audioUrl} preload="metadata" crossOrigin="anonymous" />
 
-      <header className="text-center">
-        <span className="rounded-full border border-[rgb(var(--accent))]/25 bg-[rgb(var(--accent))]/10 px-3 py-1 text-[11px] text-[rgb(var(--accent-soft))]">
-          {form}
-        </span>
-        <h1 className="mt-4 text-2xl font-bold leading-relaxed sm:text-3xl">{piece.title}</h1>
-        {piece.poet && <p className="mt-2 text-sm text-paper-dim">{piece.poet}</p>}
-        {piece.note && (
-          <p className="mx-auto mt-4 max-w-xl text-balance text-xs leading-7 text-paper-faint">
-            {piece.note}
+      <div className="mx-auto w-full max-w-4xl flex-1 px-4 sm:px-5">
+        {/* سرصفحه عمداً کم‌ارتفاع است؛ آنچه باید دیده شود، خودِ شعر است. */}
+        <header className="pt-6 text-center">
+          <h1 className="text-balance text-lg font-bold leading-relaxed sm:text-xl">
+            {piece.title}
+          </h1>
+          <p className="mt-1.5 text-xs text-paper-dim">
+            {piece.poet && <span>{piece.poet}</span>}
+            {piece.poet && <span className="mx-1.5 opacity-40">·</span>}
+            <span className="text-paper-faint">{form}</span>
+            <span className="mx-1.5 opacity-40">·</span>
+            <span className="text-paper-faint">{toPersianDigits(ordered.length)} سطر</span>
           </p>
-        )}
 
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-          {admin && (
-            <Link href={`/p/${piece.id}/edit`} className="btn btn-ghost !py-1.5 !text-xs">
-              ویرایش زمان‌بندی
-            </Link>
+          {piece.note && (
+            <p className="mx-auto mt-2.5 max-w-lg text-balance text-[11px] leading-6 text-paper-faint">
+              {piece.note}
+            </p>
           )}
-          <button
-            type="button"
-            onClick={() => setAutoScroll((v) => !v)}
-            aria-pressed={autoScroll}
-            className="btn btn-ghost !py-1.5 !text-xs"
-          >
-            پیمایش خودکار: {autoScroll ? "روشن" : "خاموش"}
-          </button>
-          {hasSegments && (
-            <button type="button" onClick={downloadLrc} className="btn btn-ghost !py-1.5 !text-xs">
-              خروجی LRC
-            </button>
-          )}
-          {admin && (
+
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
             <button
               type="button"
-              onClick={remove}
-              disabled={busy}
-              className="btn btn-danger !py-1.5 !text-xs"
+              onClick={() => setAutoScroll((v) => !v)}
+              aria-pressed={autoScroll}
+              title="پیمایش خودکار تا مصرعِ در حال خواندن"
+              className={`btn !px-2.5 !py-1 !text-[11px] ${autoScroll ? "btn-primary" : "btn-ghost"}`}
             >
-              حذف
+              <ScrollIcon />
+              پیمایش خودکار
             </button>
-          )}
-        </div>
-      </header>
+            {hasSegments && (
+              <button
+                type="button"
+                onClick={downloadLrc}
+                title="دریافت زمان‌بندی به قالب LRC"
+                className="btn btn-ghost !px-2.5 !py-1 !text-[11px]"
+              >
+                LRC
+              </button>
+            )}
+            {admin && (
+              <Link href={`/p/${piece.id}/edit`} className="btn btn-ghost !px-2.5 !py-1 !text-[11px]">
+                ویرایش
+              </Link>
+            )}
+            {admin && (
+              <button
+                type="button"
+                onClick={remove}
+                disabled={busy}
+                className="btn btn-danger !px-2.5 !py-1 !text-[11px]"
+              >
+                حذف
+              </button>
+            )}
+          </div>
+        </header>
 
-      <LyricsStage
-        segments={piece.segments}
-        currentTime={engine.currentTime}
-        onSeek={engine.seek}
-        autoScroll={autoScroll}
-        className="mt-6 max-h-[56dvh] flex-1"
-      />
+        <LyricsStage
+          segments={piece.segments}
+          currentTime={engine.currentTime}
+          onSeek={engine.seek}
+          autoScroll={autoScroll}
+          bottomInset={barHeight}
+          className="mt-7"
+          /*
+            فضای خالیِ انتهای متن، به‌اندازه‌ی نوار پخش به‌علاوه‌ی کمی بیشتر.
+            بدون آن، سند آن‌قدر بلند نیست که بیت‌های پایانی از زیر نوار بالا
+            بیایند و آخرین بیت پشت آن پنهان می‌ماند.
+          */
+          style={{ paddingBottom: barHeight + 96 }}
+        />
+      </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/5 bg-ink-950/80 backdrop-blur-xl">
-        <div className="mx-auto w-full max-w-4xl px-5 py-3">
+      {/*
+        نوار پخش تمام‌عرض و «چسبان» است: هنگام پیمایش پایین صفحه می‌ماند و در
+        انتهای شعر سر جای طبیعی خودش می‌نشیند.
+      */}
+      <div
+        ref={barRef}
+        className="sticky bottom-0 z-30 w-full border-t border-white/5 bg-ink-950/85 backdrop-blur-xl"
+        title="فاصله: پخش · بالا/پایین: بیت · چپ/راست: پنج ثانیه · R: تکرار بیت · M: بی‌صدا"
+      >
+        <div className="w-full px-4 py-2.5 sm:px-6">
           <AudioPlayer
             engine={engine}
             segments={ordered}
@@ -254,17 +300,22 @@ export function PieceView({ piece, admin }: { piece: Piece; admin: boolean }) {
             repeat={hasSegments ? repeat : undefined}
             onToggleRepeat={hasSegments ? toggleRepeat : undefined}
           />
-
-          <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-paper-faint">
-            <span>{toPersianDigits(ordered.length)} سطرِ هم‌زمان</span>
-            <span className="hidden sm:inline">
-              <span className="kbd">فاصله</span> پخش · <span className="kbd">↑</span>
-              <span className="kbd">↓</span> بیت · <span className="kbd">R</span> تکرار
-            </span>
-            <span className="sm:hidden">برای رفتن به هر مصرع، روی آن بزنید</span>
-          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function ScrollIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 4v14m0 0-4.5-4.5M12 18l4.5-4.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
