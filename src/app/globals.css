@@ -46,7 +46,15 @@ body {
   color: var(--color-paper);
   font-family: var(--font-sans);
   min-height: 100dvh;
-  overflow-x: hidden;
+}
+
+/*
+ * «clip» و نه «hidden»: هر دو سرریز افقی را می‌بُرند، ولی hidden یک قاب پیمایش
+ * می‌سازد و نوار پخشِ چسبان (position: sticky) را از کار می‌اندازد.
+ */
+html,
+body {
+  overflow-x: clip;
 }
 
 /* ——— پس‌زمینه‌ی شفق ——— */
@@ -197,9 +205,12 @@ body {
   opacity: 0.42;
 }
 
+/*
+ * بیت فعال با روشنایی و درخشش برجسته می‌شود، نه با بزرگ‌نمایی.
+ * scale سطر را پهن‌تر از قابش می‌کرد و همان، سرریز افقی صفحه بود.
+ */
 .verse-active {
   opacity: 1;
-  transform: scale(1.03);
   text-shadow: 0 0 34px rgb(var(--accent) / 0.3);
 }
 
@@ -286,8 +297,5 @@ body {
   .verse,
   .btn {
     transition: none;
-  }
-  .verse-active {
-    transform: none;
   }
 }
