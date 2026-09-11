@@ -127,8 +127,14 @@ export function AudioPlayer({
         )}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <div className="flex items-center gap-1">
+      {/*
+        شبکه‌ی سه‌ستونی با ستون میانیِ خودکار: دکمه‌ی پخش دقیقاً وسط نوار
+        می‌نشیند، مستقل از اینکه دو طرفش چند کنترل باشد. با justify-between
+        جای دکمه به تعداد کنترل‌های کناری وابسته می‌شد.
+        روی صفحه‌ی باریک، کنترل‌های اصلی یک ردیف جدا می‌گیرند.
+      */}
+      <div className="grid grid-cols-2 items-center gap-x-3 gap-y-2 sm:grid-cols-[1fr_auto_1fr]">
+        <div className="col-span-2 flex items-center gap-1 justify-self-center sm:col-span-1 sm:col-start-2 sm:row-start-1">
           {onPrevVerse && (
             <button
               type="button"
@@ -188,7 +194,7 @@ export function AudioPlayer({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-self-start sm:col-start-1 sm:row-start-1">
           {onToggleRepeat && (
             <button
               type="button"
@@ -223,7 +229,9 @@ export function AudioPlayer({
               className="range-slim w-20"
             />
           </div>
+        </div>
 
+        <div className="flex items-center gap-3 justify-self-end sm:col-start-3 sm:row-start-1">
           <div className="flex items-center gap-0.5 rounded-xl bg-white/5 p-0.5">
             {RATES.map((value) => (
               <button
