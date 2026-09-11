@@ -69,6 +69,16 @@ export function useAudioEngine(src: string | null): AudioEngine {
     const el = audioRef.current;
     if (!el) return;
 
+    // با عوض‌شدن فایل، وضعیت از نو شروع می‌شود. این ریست عمداً در همین افکت
+    // است: وقتی افکت جداگانه‌ای بود، پس از این افکت اجرا می‌شد و ready را
+    // دوباره صفر می‌کرد، پس دکمه‌ی پخشِ فایلِ از پیش بارگذاری‌شده خاموش می‌ماند.
+    setCurrentTime(0);
+    setDuration(0);
+    setReady(false);
+    setPlaying(false);
+    setError(null);
+    setBuffered(0);
+
     const onLoaded = () => {
       setDuration(Number.isFinite(el.duration) ? el.duration : 0);
       setReady(true);
@@ -93,6 +103,10 @@ export function useAudioEngine(src: string | null): AudioEngine {
       setReady(false);
     };
 
+    // اگر فایل پیش از نصب شنونده بارگذاری شده باشد (کش مرورگر یا سرور محلی)،
+    // رویداد loadedmetadata از دست می‌رود و دکمه‌ی پخش برای همیشه خاموش می‌ماند.
+    if (el.readyState >= 1) onLoaded();
+
     el.addEventListener("loadedmetadata", onLoaded);
     el.addEventListener("durationchange", onLoaded);
     el.addEventListener("play", onPlay);
@@ -114,16 +128,6 @@ export function useAudioEngine(src: string | null): AudioEngine {
       el.removeEventListener("volumechange", onVolume);
       el.removeEventListener("error", onError);
     };
-  }, [src]);
-
-  // با عوض‌شدن فایل، وضعیت از نو شروع می‌شود.
-  useEffect(() => {
-    setCurrentTime(0);
-    setDuration(0);
-    setReady(false);
-    setPlaying(false);
-    setError(null);
-    setBuffered(0);
   }, [src]);
 
   const play = useCallback(() => {
