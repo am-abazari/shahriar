@@ -1,28 +1,42 @@
-import { neon } from "@neondatabase/serverless";
+import type { Pool } from "pg";
 
 /**
  * لایه‌ی دسترسی به پستگرس با دو پشتوانه:
  *
- *  • با DATABASE_URL از درایور HTTP نئون استفاده می‌شود. روی توابع بدون‌سرور
- *    بهترین انتخاب است، چون هر پرس‌وجو یک درخواست مستقل است و استخر اتصالی
- *    برای نگه‌داشتن یا ته‌کشیدن وجود ندارد.
+ *  • با نشانی پستگرس، از درایور استاندارد (node-postgres) استفاده می‌شود.
+ *    عمداً به هیچ ارائه‌دهنده‌ای گره نخورده است: Prisma Postgres، Neon،
+ *    Supabase یا یک پستگرسِ خودی، همه با همین یک مسیر کار می‌کنند.
  *
- *  • بدون DATABASE_URL یک پستگرسِ درون‌فرایندی (PGlite) روی دیسک محلی بالا
- *    می‌آید تا اجرای توسعه‌ای به هیچ سرویس بیرونی نیاز نداشته باشد. این مسیر
- *    هرگز در پروداکشن اجرا نمی‌شود.
+ *  • بدون نشانی، یک پستگرسِ درون‌فرایندی (PGlite) روی دیسک محلی بالا می‌آید
+ *    تا اجرای توسعه‌ای به هیچ سرویس بیرونی نیاز نداشته باشد. این مسیر هرگز
+ *    در پروداکشن اجرا نمی‌شود.
  */
 
 type Rows = Record<string, unknown>[];
 type Driver = (text: string, params: unknown[]) => Promise<Rows>;
 
+/**
+ * ترتیب جست‌وجوی متغیرهای محیطی.
+ * فقط نشانی‌هایی پذیرفته می‌شوند که واقعاً پروتکل پستگرس داشته باشند؛ برخی
+ * ارائه‌دهنده‌ها زیر نام DATABASE_URL یک نشانی اختصاصی (مثل prisma+postgres)
+ * می‌گذارند که درایور استاندارد آن را نمی‌فهمد.
+ */
+const URL_KEYS = [
+  "DATABASE_URL",
+  "POSTGRES_URL",
+  "DATABASE_POSTGRES_URL",
+  "DATABASE_URL_UNPOOLED",
+  "POSTGRES_URL_NON_POOLING",
+];
+
+const POSTGRES_SCHEME = /^postgres(ql)?:\/\//i;
+
 export function databaseUrl(): string | null {
-  return (
-    process.env.DATABASE_URL ||
-    process.env.POSTGRES_URL ||
-    process.env.DATABASE_URL_UNPOOLED ||
-    process.env.POSTGRES_URL_NON_POOLING ||
-    null
-  );
+  for (const key of URL_KEYS) {
+    const value = process.env[key];
+    if (value && POSTGRES_SCHEME.test(value)) return value;
+  }
+  return null;
 }
 
 /** آیا پایگاه داده‌ی راه‌دور پیکربندی شده است؟ */
@@ -38,25 +52,49 @@ function allowLocalFallback(): boolean {
 /**
  * درایور و طرح جدول‌ها روی globalThis نگه داشته می‌شوند، نه در دامنه‌ی ماژول.
  * در Next مسیرهای app و pages گراف ماژول جداگانه دارند و همین فایل دو بار
- * ارزیابی می‌شود؛ بدون این اشتراک، حالت توسعه دو نمونه‌ی مجزای پستگرسِ محلی
- * می‌ساخت و نوشته‌های یکی برای دیگری نامرئی می‌ماند. بارگذاری دوباره‌ی داغ هم
- * به همین شکل مهار می‌شود.
+ * ارزیابی می‌شود؛ بدون این اشتراک، هر کدام استخر اتصال خودش را می‌ساخت و در
+ * حالت توسعه دو نمونه‌ی مجزای پستگرسِ محلی به وجود می‌آمد. بارگذاری دوباره‌ی
+ * داغ هم به همین شکل مهار می‌شود.
  */
 interface DbGlobal {
   driver?: Promise<Driver> | null;
   schema?: Promise<void> | null;
+  pool?: Pool | null;
 }
 
 const dbGlobal = globalThis as typeof globalThis & { __shahriarDb?: DbGlobal };
 dbGlobal.__shahriarDb ??= {};
 const shared = dbGlobal.__shahriarDb;
 
+function isLocalHost(url: string): boolean {
+  try {
+    const host = new URL(url).hostname;
+    return host === "localhost" || host === "127.0.0.1" || host === "::1";
+  } catch {
+    return false;
+  }
+}
+
 function createDriver(): Promise<Driver> {
   const url = databaseUrl();
 
   if (url) {
-    const client = neon(url);
-    return Promise.resolve(async (text, params) => (await client.query(text, params)) as Rows);
+    return (async () => {
+      const { Pool: PgPool } = await import("pg");
+      const pool = new PgPool({
+        connectionString: url,
+        // هر نمونه‌ی تابع بدون‌سرور فقط چند اتصال لازم دارد؛ استخر بزرگ روی
+        // ده‌ها نمونه‌ی هم‌زمان، سقف اتصال دیتابیس را می‌بلعد.
+        max: 3,
+        idleTimeoutMillis: 10_000,
+        connectionTimeoutMillis: 10_000,
+        // اتصال رمزگذاری می‌شود، ولی زنجیره‌ی گواهی سنجیده نمی‌شود: هر
+        // ارائه‌دهنده CA خودش را دارد و pg آن‌ها را نمی‌شناسد.
+        ssl: isLocalHost(url) ? undefined : { rejectUnauthorized: false },
+      });
+      shared.pool = pool;
+      return async (text, params) => (await pool.query(text, params)).rows as Rows;
+    })();
   }
 
   if (!allowLocalFallback()) {
