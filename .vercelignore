@@ -1,0 +1,11 @@
+.git
+.next
+node_modules
+
+# پستگرس محلیِ حالت توسعه؛ هیچ ربطی به دیپلوی ندارد و ده‌ها مگابایت است.
+.data
+
+tests
+.claude
+.idea
+*.tsbuildinfo
