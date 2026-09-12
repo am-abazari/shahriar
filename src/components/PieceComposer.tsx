@@ -209,7 +209,7 @@ export function PieceComposer({ piece }: Props) {
               onChange={(event) => setForm(event.target.value as PieceForm)}
             >
               {PIECE_FORMS.map((item) => (
-                <option key={item.value} value={item.value} className="bg-ink-800">
+                <option key={item.value} value={item.value} className="bg-surface">
                   {item.label}
                 </option>
               ))}
@@ -227,7 +227,7 @@ export function PieceComposer({ piece }: Props) {
                   aria-label={`رنگ ${name}`}
                   aria-pressed={accent === name}
                   className={`h-8 w-8 rounded-full border-2 transition ${
-                    accent === name ? "scale-110 border-white/70" : "border-white/10 hover:scale-105"
+                    accent === name ? "scale-110 border-hair/70" : "border-hair/10 hover:scale-105"
                   }`}
                   style={{ background: "rgb(var(--accent))" }}
                 />
@@ -272,7 +272,7 @@ export function PieceComposer({ piece }: Props) {
         )}
       </Section>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/5 bg-ink-950/85 backdrop-blur-xl">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-hair/5 bg-bg/85 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-4xl flex-wrap items-center justify-between gap-3 px-5 py-3">
           <div className="min-w-0 text-xs">
             {error ? (
@@ -323,7 +323,7 @@ function Section({
           {toPersianDigits(step)}
         </span>
         <h2 className="text-base font-bold">{title}</h2>
-        <span className="h-px flex-1 bg-white/5" />
+        <span className="h-px flex-1 bg-hair/5" />
       </div>
       {children}
     </section>
@@ -362,7 +362,7 @@ function AudioDrop({
       className={`rounded-3xl border-2 border-dashed p-8 text-center transition ${
         dragging
           ? "border-[rgb(var(--accent))]/60 bg-[rgb(var(--accent))]/[0.06]"
-          : "border-white/10 bg-white/[0.02]"
+          : "border-hair/10 bg-hair/[0.02]"
       }`}
     >
       <input
@@ -394,7 +394,7 @@ function AudioDrop({
 
       {upload.status === "uploading" && (
         <div className="mx-auto mt-4 max-w-xs">
-          <div className="h-1 overflow-hidden rounded-full bg-white/10">
+          <div className="h-1 overflow-hidden rounded-full bg-hair/10">
             <div
               className="h-full rounded-full bg-[rgb(var(--accent))] transition-[width]"
               style={{ width: `${Math.round(upload.progress * 100)}%` }}

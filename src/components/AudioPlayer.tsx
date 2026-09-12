@@ -93,9 +93,9 @@ export function AudioPlayer({
         }}
         className="group relative h-9 cursor-pointer touch-none select-none"
       >
-        <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 overflow-hidden rounded-full bg-white/10">
+        <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 overflow-hidden rounded-full bg-hair/10">
           <div
-            className="absolute inset-y-0 rounded-full bg-white/10"
+            className="absolute inset-y-0 rounded-full bg-hair/10"
             style={{ insetInlineStart: 0, width: `${bufferedPercent}%` }}
             aria-hidden
           />
@@ -109,7 +109,7 @@ export function AudioPlayer({
           segments.map((seg) => (
             <span
               key={seg.id}
-              className="absolute top-1/2 h-2.5 w-px -translate-y-1/2 bg-white/25"
+              className="absolute top-1/2 h-2.5 w-px -translate-y-1/2 bg-hair/25"
               style={{ insetInlineStart: `${(seg.start / duration) * 100}%` }}
               aria-hidden
             />
@@ -123,7 +123,7 @@ export function AudioPlayer({
 
         {hover && (
           <span
-            className="pointer-events-none absolute -top-1 translate-x-1/2 rounded-md bg-ink-900 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-paper shadow-lg ring-1 ring-white/10"
+            className="pointer-events-none absolute -top-1 translate-x-1/2 rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-paper shadow-lg ring-1 ring-hair/10"
             style={{ insetInlineStart: `${hover.ratio * 100}%` }}
             dir="ltr"
             aria-hidden
@@ -257,7 +257,7 @@ export function AudioPlayer({
             {toFa(rate)}×
           </button>
 
-          <div className="hidden items-center gap-0.5 rounded-xl bg-white/5 p-0.5 sm:flex">
+          <div className="hidden items-center gap-0.5 rounded-xl bg-hair/5 p-0.5 sm:flex">
             {RATES.map((value) => (
               <button
                 key={value}
@@ -265,7 +265,7 @@ export function AudioPlayer({
                 onClick={() => engine.setRate(value)}
                 className={`rounded-lg px-1.5 py-1 text-[11px] transition ${
                   rate === value
-                    ? "bg-[rgb(var(--accent))] font-semibold text-ink-950"
+                    ? "bg-[rgb(var(--accent))] font-semibold text-on-accent"
                     : "text-paper-dim hover:text-paper"
                 }`}
               >

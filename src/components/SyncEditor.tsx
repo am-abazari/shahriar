@@ -184,7 +184,7 @@ export function SyncEditor({ draft, onChange, engine }: Props) {
         </div>
 
         <div className="mt-3 flex items-center gap-3">
-          <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
+          <div className="h-1 flex-1 overflow-hidden rounded-full bg-hair/10">
             <div
               className="h-full rounded-full bg-[rgb(var(--accent))] transition-[width]"
               style={{ width: draft.length ? `${(done / draft.length) * 100}%` : "0%" }}
@@ -224,14 +224,14 @@ export function SyncEditor({ draft, onChange, engine }: Props) {
                 selected
                   ? "border-[rgb(var(--accent))]/50 bg-[rgb(var(--accent))]/[0.07]"
                   : playing
-                    ? "border-white/15 bg-white/[0.05]"
-                    : "border-white/[0.07] bg-white/[0.02]"
+                    ? "border-hair/15 bg-hair/[0.05]"
+                    : "border-hair/[0.07] bg-hair/[0.02]"
               } ${issue ? "!border-red-400/40" : ""}`}
             >
               <div className="flex items-start gap-3">
                 <span
                   className={`mt-2 grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[11px] tabular-nums ${
-                    isTimed(seg) ? "bg-[rgb(var(--accent))]/20 text-[rgb(var(--accent-soft))]" : "bg-white/5 text-paper-faint"
+                    isTimed(seg) ? "bg-[rgb(var(--accent))]/20 text-[rgb(var(--accent-soft))]" : "bg-hair/5 text-paper-faint"
                   }`}
                 >
                   {toPersianDigits(index + 1)}
@@ -325,7 +325,7 @@ export function SyncEditor({ draft, onChange, engine }: Props) {
       </ul>
 
       {!draft.length && (
-        <p className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-paper-faint">
+        <p className="rounded-2xl border border-dashed border-hair/10 p-8 text-center text-sm text-paper-faint">
           هنوز متنی وارد نشده است. از «ویرایش یک‌جای متن» شعر را بچسبانید.
         </p>
       )}
@@ -358,7 +358,7 @@ function RowButton({
       className={`rounded-lg border px-2 py-1 text-[11px] transition disabled:opacity-35 ${
         danger
           ? "border-red-400/25 text-red-300/80 hover:bg-red-500/10"
-          : "border-white/10 text-paper-dim hover:bg-white/10 hover:text-paper"
+          : "border-hair/10 text-paper-dim hover:bg-hair/10 hover:text-paper"
       }`}
     >
       {children}

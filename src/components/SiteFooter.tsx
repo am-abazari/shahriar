@@ -14,7 +14,7 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-8 border-t border-white/5 py-10">
+    <footer className="mt-8 border-t border-hair/5 py-10">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-4 px-5 text-center">
         <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-paper-dim">
           <a
@@ -25,7 +25,7 @@ export function SiteFooter() {
           >
             amabazari.ir
           </a>
-          <span className="h-1 w-1 rounded-full bg-white/15" aria-hidden />
+          <span className="h-1 w-1 rounded-full bg-hair/15" aria-hidden />
           <a
             href="https://github.com/am-abazari/shahriar"
             target="_blank"

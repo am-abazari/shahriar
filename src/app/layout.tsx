@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Vazirmatn } from "next/font/google";
 import Link from "next/link";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ThemeToggle, themeBootScript } from "@/components/ThemeToggle";
 import { isAdmin } from "@/server/session";
 import "./globals.css";
 
@@ -28,16 +29,24 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07070c",
+  // نوار مرورگر با تم صفحه هم‌رنگ می‌شود.
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#07070c" },
+    { media: "(prefers-color-scheme: light)", color: "#faf7f1" },
+  ],
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const admin = await isAdmin();
 
   return (
-    <html lang="fa" dir="rtl" className={vazir.variable} data-accent="amber">
+    <html lang="fa" dir="rtl" className={vazir.variable} data-accent="amber" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+      </head>
       <body className="antialiased">
         <div className="aurora" aria-hidden />
         <div className="grain" aria-hidden />
@@ -53,12 +62,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
 function SiteHeader({ admin }: { admin: boolean }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-white/5 bg-ink-950/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-hair/5 bg-bg/70 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-5">
         <Link href="/" className="group flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-bl from-gold-soft to-gold text-lg font-bold text-ink-950 shadow-lg shadow-gold/20">
-            ش
-          </span>
+          <img
+            src="/logo.svg"
+            alt=""
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-xl shadow-lg shadow-gold/20"
+          />
           <span className="flex flex-col leading-none">
             <span className="text-base font-bold tracking-tight">شهریار</span>
             <span className="mt-1 hidden text-[11px] text-paper-faint sm:block">شعر، هم‌زمان با صدا</span>
@@ -69,6 +82,7 @@ function SiteHeader({ admin }: { admin: boolean }) {
           <Link href="/" className="btn btn-ghost hidden sm:inline-flex">
             گنجینه
           </Link>
+          <ThemeToggle />
           {admin ? (
             <>
               <Link

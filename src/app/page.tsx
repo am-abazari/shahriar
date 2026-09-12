@@ -13,7 +13,7 @@ export default async function HomePage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-12 sm:py-20">
       <section className="mx-auto max-w-3xl text-center">
-        <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-paper-dim">
+        <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-hair/10 bg-hair/[0.03] px-3 py-1 text-[11px] text-paper-dim">
           <span className="h-1.5 w-1.5 rounded-full bg-gold" />
           شعر، هم‌زمان با صدای شاعر
         </p>

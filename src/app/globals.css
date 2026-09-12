@@ -1,15 +1,25 @@
 @import "tailwindcss";
 
+/*
+ * نشانه‌های رنگ معنایی‌اند، نه توصیفی: «bg» یعنی پس‌زمینه‌ی صفحه، نه «تیره».
+ * مقدارهای اینجا تم شبانه‌اند و در بخش تم روشن بازتعریف می‌شوند؛ چون هر ابزار
+ * تیلویند به همین متغیرها اشاره می‌کند، عوض‌کردن مقدار کلِ رابط را می‌چرخاند.
+ */
 @theme {
-  --color-ink-950: #07070c;
-  --color-ink-900: #0b0b14;
-  --color-ink-800: #12121e;
-  --color-ink-700: #1a1a2b;
-  --color-ink-600: #26263c;
+  --color-bg: #07070c;
+  --color-surface: #12121e;
+  --color-surface-2: #0b0b14;
 
+  /* رنگ متن؛ نامش از کاغذ می‌آید ولی معنایش «پیش‌زمینه» است. */
   --color-paper: #ece7dd;
   --color-paper-dim: #a09a90;
   --color-paper-faint: #6d6862;
+
+  /* خط‌های مو و سطح‌های شناور، همیشه با شفافیت کم به کار می‌روند. */
+  --color-hair: #ffffff;
+
+  /* متنی که روی رنگ لهجه می‌نشیند. */
+  --color-on-accent: #14100a;
 
   --color-gold: #e3b04b;
   --color-gold-soft: #f3d68f;
@@ -31,6 +41,58 @@
 [data-accent="emerald"]{ --accent: 92 200 160;  --accent-soft: 152 231 202; }
 [data-accent="sky"]    { --accent: 108 178 240; --accent-soft: 168 213 250; }
 
+/* ——————————————————— تم روشن ———————————————————
+ *
+ * کاغذِ گرم به‌جای سفیدِ سرد، چون این صفحه‌ها را طولانی می‌خوانند.
+ * نشانه‌ها همان‌هایند و فقط مقدارشان عوض می‌شود، پس هیچ کامپوننتی از تم خبر
+ * ندارد. رنگ‌های لهجه در تم روشن تیره‌تر می‌شوند وگرنه روی کاغذ خوانده
+ * نمی‌شوند؛ و «soft» که در تم شبانه روشن‌تر بود، اینجا تیره‌تر است، چون همان
+ * متغیر رنگِ متنِ بیتِ در حال خواندن را می‌سازد.
+ */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: #faf7f1;
+  --color-surface: #fffdf8;
+  --color-surface-2: #f1ece1;
+
+  --color-paper: #1f1c17;
+  --color-paper-dim: #5c564c;
+  --color-paper-faint: #8a8379;
+
+  --color-hair: #2b261d;
+  --color-on-accent: #fffdf8;
+
+  --accent: 176 118 24;
+  --accent-soft: 146 94 14;
+}
+
+:root[data-theme="light"] [data-accent="amber"]  { --accent: 176 118 24;  --accent-soft: 146 94 14; }
+:root[data-theme="light"] [data-accent="rose"]   { --accent: 196 62 84;   --accent-soft: 162 44 66; }
+:root[data-theme="light"] [data-accent="violet"] { --accent: 112 78 208;  --accent-soft: 88 58 178; }
+:root[data-theme="light"] [data-accent="emerald"]{ --accent: 20 138 100;  --accent-soft: 12 112 80; }
+:root[data-theme="light"] [data-accent="sky"]    { --accent: 28 112 190;  --accent-soft: 20 90 158; }
+
+/* پس‌زمینه‌ی شفق و بافت کاغذ روی زمینه‌ی روشن باید بسیار کم‌رنگ‌تر باشند. */
+:root[data-theme="light"] .aurora::before,
+:root[data-theme="light"] .aurora::after {
+  opacity: 0.1;
+}
+
+:root[data-theme="light"] .grain {
+  opacity: 0.02;
+}
+
+:root[data-theme="light"] .btn-danger {
+  background: rgb(196 40 40 / 0.08);
+  border-color: rgb(196 40 40 / 0.28);
+  color: #a52020;
+}
+
+:root[data-theme="light"] .btn-danger:not(:disabled):hover {
+  background: rgb(196 40 40 / 0.14);
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
 }
@@ -42,7 +104,7 @@ body {
 }
 
 body {
-  background-color: var(--color-ink-950);
+  background-color: var(--color-bg);
   color: var(--color-paper);
   font-family: var(--font-sans);
   min-height: 100dvh;
@@ -108,8 +170,8 @@ body {
 
 /* ——— اجزای مشترک ——— */
 .glass {
-  background: color-mix(in oklab, var(--color-ink-800) 72%, transparent);
-  border: 1px solid rgb(255 255 255 / 0.07);
+  background: color-mix(in oklab, var(--color-surface) 72%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-hair) 7%, transparent);
   backdrop-filter: blur(18px);
 }
 
@@ -135,7 +197,7 @@ body {
 
 .btn-primary {
   background: linear-gradient(140deg, rgb(var(--accent-soft)), rgb(var(--accent)));
-  color: #14100a;
+  color: var(--color-on-accent);
   box-shadow: 0 10px 30px -12px rgb(var(--accent) / 0.7);
 }
 
@@ -145,13 +207,13 @@ body {
 }
 
 .btn-ghost {
-  background: rgb(255 255 255 / 0.05);
-  border-color: rgb(255 255 255 / 0.09);
+  background: color-mix(in oklab, var(--color-hair) 5%, transparent);
+  border-color: color-mix(in oklab, var(--color-hair) 9%, transparent);
   color: var(--color-paper);
 }
 
 .btn-ghost:not(:disabled):hover {
-  background: rgb(255 255 255 / 0.1);
+  background: color-mix(in oklab, var(--color-hair) 10%, transparent);
 }
 
 .btn-danger {
@@ -167,8 +229,8 @@ body {
 .field {
   width: 100%;
   border-radius: 0.85rem;
-  background: rgb(255 255 255 / 0.04);
-  border: 1px solid rgb(255 255 255 / 0.09);
+  background: color-mix(in oklab, var(--color-hair) 4%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-hair) 9%, transparent);
   padding: 0.7rem 0.9rem;
   color: var(--color-paper);
   font-family: inherit;
@@ -232,7 +294,7 @@ body {
 }
 
 .scrollbar-slim::-webkit-scrollbar-thumb {
-  background: rgb(255 255 255 / 0.12);
+  background: color-mix(in oklab, var(--color-hair) 12%, transparent);
   border-radius: 999px;
 }
 
@@ -246,7 +308,7 @@ body {
   appearance: none;
   height: 4px;
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.14);
+  background: color-mix(in oklab, var(--color-hair) 14%, transparent);
   outline: none;
   cursor: pointer;
 }
@@ -280,8 +342,8 @@ body {
   min-width: 1.35rem;
   padding: 0.1rem 0.35rem;
   border-radius: 0.4rem;
-  border: 1px solid rgb(255 255 255 / 0.12);
-  background: rgb(255 255 255 / 0.05);
+  border: 1px solid color-mix(in oklab, var(--color-hair) 12%, transparent);
+  background: color-mix(in oklab, var(--color-hair) 5%, transparent);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10px;
   line-height: 1.5;

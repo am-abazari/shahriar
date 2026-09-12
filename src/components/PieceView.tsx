@@ -287,7 +287,7 @@ export function PieceView({ piece, admin }: { piece: Piece; admin: boolean }) {
       */}
       <div
         ref={barRef}
-        className="sticky bottom-0 z-30 w-full border-t border-white/5 bg-ink-950/85 backdrop-blur-xl"
+        className="sticky bottom-0 z-30 w-full border-t border-hair/5 bg-bg/85 backdrop-blur-xl"
         title="فاصله: پخش · بالا/پایین: بیت · چپ/راست: پنج ثانیه · R: تکرار بیت · M: بی‌صدا"
       >
         <div className="w-full px-4 py-2.5 sm:px-6">

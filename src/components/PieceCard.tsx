@@ -33,7 +33,7 @@ export function PieceCard({ piece }: { piece: PieceSummary }) {
         <p className="relative mt-3 line-clamp-2 text-xs leading-6 text-paper-faint">{piece.note}</p>
       )}
 
-      <div className="relative mt-5 flex items-center justify-between border-t border-white/5 pt-3">
+      <div className="relative mt-5 flex items-center justify-between border-t border-hair/5 pt-3">
         <span className="text-[11px] text-paper-faint">
           {piece.segmentCount > 0
             ? `${toPersianDigits(piece.segmentCount)} سطرِ هم‌زمان`
