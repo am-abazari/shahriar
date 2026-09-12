@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>آفلاین | شهریار</title>
+    <style>
+      /*
+       * این صفحه بدون شبکه سرو می‌شود، پس همه‌چیزش درون‌خطی است:
+       * نه فونت بیرونی، نه شیت جدا.
+       */
+      :root { color-scheme: dark light; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+        background: #07070c;
+        color: #ece7dd;
+        font-family: Vazirmatn, "IRANYekan", ui-sans-serif, system-ui, sans-serif;
+        text-align: center;
+      }
+      @media (prefers-color-scheme: light) {
+        body { background: #faf7f1; color: #1f1c17; }
+        .note { color: #5c564c; }
+      }
+      img { width: 72px; height: 72px; border-radius: 18px; }
+      h1 { font-size: 1.15rem; margin: 1.5rem 0 0; }
+      .note { margin-top: 0.75rem; font-size: 0.85rem; line-height: 2; color: #a09a90; max-width: 22rem; }
+      button {
+        margin-top: 1.75rem;
+        border: 0;
+        border-radius: 0.85rem;
+        padding: 0.7rem 1.6rem;
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #14100a;
+        background: linear-gradient(140deg, #f3d68f, #e3b04b);
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <img src="/logo.svg" alt="" />
+      <h1>اتصالی نیست</h1>
+      <p class="note">
+        برای شنیدن یک اثر به اینترنت نیاز است. صفحه‌هایی که پیش‌تر باز کرده‌اید
+        همچنان در دسترس‌اند.
+      </p>
+      <button onclick="location.reload()">تلاش دوباره</button>
+    </div>
+  </body>
+</html>

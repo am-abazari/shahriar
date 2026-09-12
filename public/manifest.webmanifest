@@ -1,0 +1,28 @@
+{
+  "name": "شهریار — شعر، هم‌زمان با صدا",
+  "short_name": "شهریار",
+  "description": "شعر و غزل با صدای شاعر؛ هر بیت دقیقاً هم‌زمان با خوانده‌شدنش روشن می‌شود.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#07070c",
+  "theme_color": "#07070c",
+  "lang": "fa-IR",
+  "dir": "rtl",
+  "categories": ["music", "books", "education"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "گنجینه",
+      "short_name": "گنجینه",
+      "url": "/",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

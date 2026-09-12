@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Vazirmatn } from "next/font/google";
 import Link from "next/link";
 import { SiteFooter } from "@/components/SiteFooter";
+import { PwaSetup } from "@/components/PwaSetup";
 import { ThemeToggle, themeBootScript } from "@/components/ThemeToggle";
 import { isAdmin } from "@/server/session";
 import "./globals.css";
@@ -20,6 +21,20 @@ export const metadata: Metadata = {
   description:
     "شهریار بستری برای انتشار شعر و غزل با صدای شاعر است؛ هر بیت دقیقاً هم‌زمان با خوانده‌شدنش روشن می‌شود.",
   keywords: ["شعر", "غزل", "دکلمه", "لیریکس", "شهریار", "صوت"],
+  manifest: "/manifest.webmanifest",
+  applicationName: "شهریار",
+  appleWebApp: {
+    capable: true,
+    title: "شهریار",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
     title: "شهریار",
     description: "شعر و غزل، هم‌زمان با صدای شاعر.",
@@ -83,6 +98,7 @@ function SiteHeader({ admin }: { admin: boolean }) {
             گنجینه
           </Link>
           <ThemeToggle />
+          <PwaSetup />
           {admin ? (
             <>
               <Link
