@@ -33,6 +33,12 @@ export function AudioPlayer({
   const [hover, setHover] = useState<{ ratio: number; time: number } | null>(null);
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  /** چرخش میان سرعت‌های پخش؛ برای دکمه‌ی جمع‌وجورِ موبایل. */
+  const cycleRate = () => {
+    const index = RATES.indexOf(rate);
+    engine.setRate(RATES[(index + 1) % RATES.length]);
+  };
   const bufferedPercent = duration > 0 ? Math.min(100, (buffered / duration) * 100) : 0;
 
   /** چیدمان راست‌به‌چپ است، پس نسبت را از لبه‌ی راست می‌سنجیم. */
@@ -133,14 +139,19 @@ export function AudioPlayer({
         جای دکمه به تعداد کنترل‌های کناری وابسته می‌شد.
         روی صفحه‌ی باریک، کنترل‌های اصلی یک ردیف جدا می‌گیرند.
       */}
-      <div className="grid grid-cols-2 items-center gap-x-3 gap-y-2 sm:grid-cols-[1fr_auto_1fr]">
-        <div className="col-span-2 flex items-center gap-1 justify-self-center sm:col-span-1 sm:col-start-2 sm:row-start-1">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-2 sm:gap-x-3">
+        {/*
+          گروه اصلی عمداً چپ‌به‌راست است: «بیت بعدی» سمت راستِ دکمه‌ی پخش و
+          «بیت پیشین» سمت چپ آن می‌نشیند، مثل هر پخش‌کننده‌ی دیگری. نوار
+          پیشرفت هم از چپ به راست پیش می‌رود، پس جهت‌ها با هم می‌خوانند.
+        */}
+        <div dir="ltr" className="col-start-2 row-start-1 flex items-center gap-2 justify-self-center sm:gap-1">
           {onPrevVerse && (
             <button
               type="button"
               onClick={onPrevVerse}
               disabled={!ready}
-              className="btn btn-ghost !px-2"
+              className="btn btn-ghost !px-1.5 sm:!px-2"
               title="بیت پیشین"
               aria-label="بیت پیشین"
             >
@@ -152,7 +163,7 @@ export function AudioPlayer({
             type="button"
             onClick={() => engine.nudge(-5)}
             disabled={!ready}
-            className="btn btn-ghost !px-2.5"
+            className="btn btn-ghost !hidden !px-2 sm:!inline-flex sm:!px-2.5"
             title="۵ ثانیه عقب"
             aria-label="پنج ثانیه عقب"
           >
@@ -163,7 +174,7 @@ export function AudioPlayer({
             type="button"
             onClick={engine.toggle}
             disabled={!ready}
-            className="btn btn-primary !h-11 !w-11 !rounded-full !p-0"
+            className="btn btn-primary !h-10 !w-10 !rounded-full !p-0 sm:!h-11 sm:!w-11"
             aria-label={playing ? "مکث" : "پخش"}
           >
             {playing ? <PauseIcon /> : <PlayIcon />}
@@ -173,7 +184,7 @@ export function AudioPlayer({
             type="button"
             onClick={() => engine.nudge(5)}
             disabled={!ready}
-            className="btn btn-ghost !px-2.5"
+            className="btn btn-ghost !hidden !px-2 sm:!inline-flex sm:!px-2.5"
             title="۵ ثانیه جلو"
             aria-label="پنج ثانیه جلو"
           >
@@ -185,7 +196,7 @@ export function AudioPlayer({
               type="button"
               onClick={onNextVerse}
               disabled={!ready}
-              className="btn btn-ghost !px-2"
+              className="btn btn-ghost !px-1.5 sm:!px-2"
               title="بیت بعدی"
               aria-label="بیت بعدی"
             >
@@ -194,7 +205,7 @@ export function AudioPlayer({
           )}
         </div>
 
-        <div className="flex items-center gap-2 justify-self-start sm:col-start-1 sm:row-start-1">
+        <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:gap-2">
           {onToggleRepeat && (
             <button
               type="button"
@@ -202,7 +213,7 @@ export function AudioPlayer({
               aria-pressed={repeat}
               title="تکرار بیتِ جاری"
               aria-label="تکرار بیت جاری"
-              className={`btn !px-2.5 ${repeat ? "btn-primary" : "btn-ghost"}`}
+              className={`btn !px-2 sm:!px-2.5 ${repeat ? "btn-primary" : "btn-ghost"}`}
             >
               <RepeatIcon />
             </button>
@@ -231,8 +242,22 @@ export function AudioPlayer({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 justify-self-end sm:col-start-3 sm:row-start-1">
-          <div className="flex items-center gap-0.5 rounded-xl bg-white/5 p-0.5">
+        <div className="col-start-3 row-start-1 flex items-center gap-2 justify-self-end sm:gap-3">
+          {/*
+            نوار کامل سرعت روی موبایل جا نمی‌شود و نوار پخش را دو ردیفه می‌کرد،
+            پس آنجا به یک دکمه‌ی چرخشی جمع می‌شود؛ خودِ قابلیت از دست نمی‌رود.
+          */}
+          <button
+            type="button"
+            onClick={cycleRate}
+            title="سرعت پخش"
+            aria-label={`سرعت پخش: ${toFa(rate)} برابر`}
+            className="btn btn-ghost !px-2 font-mono !text-[11px] tabular-nums sm:hidden"
+          >
+            {toFa(rate)}×
+          </button>
+
+          <div className="hidden items-center gap-0.5 rounded-xl bg-white/5 p-0.5 sm:flex">
             {RATES.map((value) => (
               <button
                 key={value}
@@ -249,7 +274,7 @@ export function AudioPlayer({
             ))}
           </div>
 
-          <p className="font-mono text-xs tabular-nums text-paper-dim" dir="ltr">
+          <p className="hidden font-mono tabular-nums text-paper-dim sm:block sm:text-xs" dir="ltr">
             <span className="text-paper">{formatTimeFa(currentTime)}</span>
             <span className="mx-1 opacity-40">/</span>
             <span>{formatTimeFa(duration)}</span>
