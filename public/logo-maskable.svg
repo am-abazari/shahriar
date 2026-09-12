@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="شهریار">
+  <title>شهریار</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1a1830"/>
+      <stop offset="1" stop-color="#07070c"/>
+    </linearGradient>
+    <!--
+      واحد userSpaceOnUse لازم است: خط کاملاً عمودی عرضِ کادرِ صفر دارد و
+      گرادیانِ نسبت‌به‌شکل روی آن فرومی‌پاشد و اصلاً رسم نمی‌شود.
+    -->
+    <linearGradient id="ink" x1="400" y1="120" x2="140" y2="380" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f7e0a6"/>
+      <stop offset="1" stop-color="#dfa73a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- بدون گوشه‌ی گرد: اندروید خودش ماسک را اعمال می‌کند. -->
+  <rect width="512" height="512" fill="#0b0b14"/>
+
+  <!--
+    نشانه در ۸۰٪ میانیِ کادر می‌ماند؛ ماسک اندروید بیرون این ناحیه را می‌بُرد.
+    مقیاس حول مرکز کادر و مرکز خودِ نشانه گرفته شده است.
+  -->
+  <g transform="translate(256 256) scale(0.7) translate(-264.0 -207.0)">
+  <g fill="none" stroke="url(#ink)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M372 318V196"/>
+    <path d="M310 318V240"/>
+    <path d="M248 318V276"/>
+    <path d="M386 318H214c-44 0-72-26-72-62 0-24 13-43 34-53"/>
+  </g>
+
+  <!-- سه نقطه‌ی «ش» -->
+  <g fill="#f7e0a6">
+    <circle cx="310" cy="150" r="16"/>
+    <circle cx="372" cy="150" r="16"/>
+    <circle cx="341" cy="98" r="16"/>
+  </g>
+  </g>
+</svg>
